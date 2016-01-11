@@ -1,6 +1,6 @@
-/*   MingGe.scrollLoad2.51插件
+/*   MingGe.scrollLoad2.52插件（Min）
  *
- *   2.51升级内容：加入container容器操作，这个功能在2.0的时候忘记了，修复各种事件机制，以及各种优化修复等
+ *   2.52升级内容：加入bubblScrollLoad手动冒泡事件，container容器操作，这个功能在2.0的时候忘记了，修复各种事件机制，以及各种优化修复等
  *  
  *   图片或者节点滚动加载插件
  *
@@ -14,18 +14,19 @@
     addEvent = D.addEvent,
     cacheData = [],
     isTransition,
+    getOpacity,
     DOC = document,
     defaultArg = {
         attr: "_src",
         loadTime: 50,
         container: $(window),
         del: true,
-        animate: "ease",
+        animate: ["ease", 500],
         event: "scroll"
     },
     del = function(eve) {
         var container = this,
-        MGSL, cache, isUn = D.isUndefined(eve),
+        MGSL, cache, isUn = D.isUndefined(eve = D.trim(eve)),
         count,
         isWin,
         eCache,
@@ -33,7 +34,7 @@
         bodys = DOC.body;
         for (var i = 0; i < container.length; i++) {
             elem = container[i];
-            isWin = elem == window;
+            isWin = elem == window || eve == "scroll" && (elem == DOC || elem == bodys);
             eCache = isWin ? D: elem;
             MGSL = eCache.MingGeScrollLoad;
             if (D.isNumber(MGSL) && (cache = cacheData[MGSL])) {
@@ -41,10 +42,6 @@
                 function(k, v) {
                     if (isUn || k == eve) {
                         count = v.callback.count;
-                        if (k == "scroll" && elem == DOC && elem == bodys) {
-                            elem = window;
-                            isWin = true;
-                        }
                         if (!isWin || k != "scroll") {
                             delEvent(elem, k, v.callback);
                             delete cache[k];
@@ -74,7 +71,7 @@
     setDefault = function(elem, arg) {
         for (var i = elem.length - 1; i > -1; i--) {
             if (elem[i].getAttribute(arg.attr)) {
-                elem[i].setAttribute("src", arg.defaultSrc);
+                elem[i].src = arg.defaultSrc;
             } else {
                 elem.splice(i, 1);
             }
@@ -102,13 +99,15 @@
     },
     opacity = function(MimgGet, this_) {
         return function() {
+            var arg = this_.arg,
+            animate = arg.animate;
             MimgGet.animate({
                 opacity: 1
             },
-            500, this_.arg.animate,
+            animate[1], animate[0],
             function() {
-                D(this).css("opacity", null);
-                this_.arg.success && this_.arg.success.call(this);
+                this.style[getOpacity] = null;
+                arg.success && arg.success.call(this);
             });
             this_.callback();
         };
@@ -119,9 +118,12 @@
         D.isFunction(arg.success) || (arg.success = false);
         D.isFunction(arg.error) || (arg.error = false);
         D.isString(arg.defaultSrc) && arg.attr && setDefault(elem, arg);
+        if (arg.animate !== false && !D.isArray(arg.animate)) {
+            arg.animate = ["ease", 500];
+        }
     },
     scrollLoad = function(elem, arg) {
-        isTransition == null && (isTransition = !!(D._protected.transition = D.html5Attribute("transition")));
+        isTransition == null && (getOpacity = D.html5Attribute("opacity"), isTransition = !!(D._protected.transition = D.html5Attribute("transition")));
         D.isObject(arg) || (arg = {});
         D.isString(arg.event) || (arg.event = defaultArg.event);
         arg.container || (arg.container = defaultArg.container);
@@ -188,7 +190,7 @@
                 src = this.isRange(args, imgGet);
                 if (src) {
                     img.splice(i, 1);
-                    var MimgGet, loading, this_ = this;
+                    var loading, this_ = this;
                     if (src !== true) {
                         loading = new Image();
                         var imgError = function() {
@@ -200,17 +202,16 @@
                             delEvent(loading, "load", imgLoad);
                             delEvent(loading, "error", imgError);
                             if (isTransition && arg.animate) {
-                                MimgGet = D(imgGet).css("opacity", 0);
-                                imgGet.src = src;
-                                setTimeout(opacity(MimgGet, this_), 10);
+                                imgGet.style[getOpacity] = 0;
+                                setTimeout(opacity(D(imgGet), this_), 10);
                             } else {
-                                imgGet.src = src;
                                 setTimeout(function() {
                                     this_.callback();
                                 },
                                 10);
                                 arg.success && arg.success.call(imgGet);
                             }
+                            imgGet.src = src;
                             imgGet.removeAttribute(arg.attr);
                         };
                         addEvent(loading, "load", imgLoad);
@@ -234,7 +235,11 @@
                 imgRangeLEnd = imgRangeL + imgGet.offsetWidth,
                 imgRangeT = rect.top + RangeT + 1,
                 imgRangeTEnd = imgRangeT + imgGet.offsetHeight;
-                if ((imgRangeT > RangeT && imgRangeT < RangeTEnd || imgRangeTEnd > RangeT && imgRangeTEnd < RangeTEnd) && (imgRangeL > RangeL && imgRangeL < RangeLEnd || imgRangeLEnd > RangeL && imgRangeLEnd < RangeLEnd)) {
+                if ((imgRangeT > RangeT && imgRangeT < RangeTEnd 
+				|| imgRangeTEnd > RangeT&& imgRangeTEnd < RangeTEnd) 
+				&& 
+				(imgRangeL > RangeL && imgRangeL < RangeLEnd 
+				|| imgRangeLEnd > RangeL && imgRangeLEnd < RangeLEnd)) {
                     return src;
                 }
             } else return false;
@@ -260,8 +265,21 @@
             del.call(this.nodeList, event);
             return this;
         },
+        bubblScrollLoad: function(eveName) {
+            var elem, i = 0,
+            MGSL, cache;
+            eveName = D.isString(eveName) && D.trim(eveName) || "scroll";
+            while (elem = this.nodeList[i++]) {
+                cache = elem == window || eveName == "scroll" && (elem == DOC || elem == DOC.body) ? D: elem;
+                MGSL = cache.MingGeScrollLoad;
+                if (D.isNumber(MGSL) && (cache = cacheData[MGSL]) && (cache = cacheData[MGSL][eveName])) {
+                    cache.callback();
+                }
+            }
+            return this;
+        },
         scrollLoad: function(options) {
-            new scrollLoad(this.nodeList, options);
+            new scrollLoad(this.nodeList.concat(), options);
             return this;
         }
     });

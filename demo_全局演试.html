@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="renderer" content="webkit" />
 <meta http-equiv="X-UA-Compatible" content="IE=8,9,10" />
-<title>滚动加载图片插件-MingGe.scrollLoad2.51- MingGeJS插件-作者：明哥 QQ399195513</title>
+<title>滚动加载图片插件-MingGe.scrollLoad2.52- MingGeJS插件-作者：明哥 QQ399195513</title>
 <script src="js/MingGe_Min_1.8.2.js"  type="text/javascript"></script><!--第一步先加载MingGeJS类库,了解minggeJS 请进 http://www.shearphoto.com/bbs/forum.php?mod=viewthread&tid=41-->
 <script src="js/MingGe.scrollLoad_Min.js" type="text/javascript"></script><!--默认的是加载压缩版本。有提供源码的，在JS文件夹内自己看-->
 <style type="text/css">
@@ -53,44 +53,58 @@ body, ul, li, img, div {
 </style>
 <script type="text/javascript">
 $(function () {
-	 $("img").scrollLoad({ 
-		  container  :$(window),		 //容器对象,默认是	 $(window)，可省略	 
+	  $("img").scrollLoad({ 
+	 
+		  container  : $(window),		 //容器对象,默认是	 $(window)，可省略	 
+		  
 		  attr       :"_src",           //图片地址所在属性,可省略。默认值_src     如果不需要attr设置，    attr请填false
+		  
 		  defaultSrc :"js/loading.gif",  //开始时src图片，默认不加载
+		  
 		  loadTime   :80,                //滚动事件触发后，多久进行src替换（单位毫秒） 默认是50毫秒,设得越大，性能越好
+		  
 		  success    :function(){        //执行成功执行函数,可省略
-		             // alert(this);
+		     // alert(this);
 				      },
-		  error       :function(){       //SRC错误时触发,可省略（  attr 设置后才有返回）
-		             //alert("我发生错误了"+this);
+					  
+		  error       :function(){       //src错误时触发,可省略（注意  attr=false 没有返回）
+		     //alert("我发生错误了"+this);
 				       }, 
-		  animate     :"ease",            //加载图片时的，动画效果,默认ease，linear|ease|ease-in|ease-out|ease-in-out|cubic-bezier 可选择的动画模式      
+					   
+		  animate     :["ease",500],            //加载图片时的，动画效果,默认ease，linear|ease|ease-in|ease-out|ease-in-out|cubic-bezier 第二个参数是效果时间，默认500 ，不需要动画设false      
+		  
 		  del         :true,              //是否加载完删除事件 默认true，,可省略
-		  event       :"scroll"         //用什么事件来触发，默认"scroll",可省略
+		  
+		  event       :"scroll"          //用什么事件来触发，默认"scroll",可省略
+		  
 	  }); 
-	  // $(window).delScrollLoad("scroll");删除滚动加载事件,注意引的是容器对象container（不要搞错哦），参数1：事件名称，事件名称为空时，删除所有该容器
-	 //$("img").scrollLoad();更新img或节点对象(事件存在时则以更新模式运行，不存在时则重新建立事件)
-	   
+	    // $(window).delScrollLoad("scroll");     //删除滚动加载事件,注意引入的是容器对象是container（不要搞错哦），参数1：事件名称，事件名称为空时，删除所有该容器。
+	  
+	    //$("img").scrollLoad();                 //更新img或节点对象(事件存在时则以更新模式运行，不存在时则重新建立事件)。
+	 
+	    //$(window).bubblScrollLoad("scroll");     //手动冒泡事件,注意引入的是容器对象是container（不要搞错哦） ，参数1：事件名称  为空时默认 "scroll"。        
+		
+		 
 });
 </script>
 </head>
 <body>
 <!--
- *  MingGe.scrollLoad的开发专门针对lazyload来强爆的
+ *   MingGe.scrollLoad的开发专门针对lazyload来强爆的
  *
- *  MingGe.scrollLoad无论执行效率还是准确性都在lazyload之上，秒杀lazyload一条街，
+ *   MingGe.scrollLoad无论执行效率还是准确性都在lazyload之上，秒杀lazyload一条街，
  *
- *  首先lazyload在瀑布流页面下是执行不正确的，我提供的demo.html采用的就是瀑布流，不信代入lazyload接口试试
+ *   首先lazyload在瀑布流页面下是执行不正确的，我提供的demo.html采用的就是瀑布流，不信代入lazyload接口试试
  *
- *  其次lazyload是不兼容IE678的，lazyload很认真讲就是水货一件
+ *   其次lazyload是不兼容IE678的，lazyload很认真讲就是水货一件
  *
- *  还有lazyload执行效率非常差，作者水平很一般，可能作者JQUERY中毒太深了，大家对比一下自然明白。
+ *   还有lazyload执行效率非常差，作者水平很一般，可能作者JQUERY中毒太深了，大家对比一下自然明白。
  *
  *   MingGe.scrollLoad，是由明哥先生三天开发而成QQ399195513,官网：www.shearphoto.com      QQ群：461550716
  *
- *   MingGe.scrollLoad2.51插件
+ *   MingGe.scrollLoad2.52插件
  *
- *   2.51升级内容：加入container容器操作，这个功能在2.51的时候忘记了，修复各种事件机制，以及各种优化修复等
+ *   2.52升级内容：加入bubblScrollLoad手动冒泡事件。container容器操作，这个功能在2.0的时候忘记了，修复各种事件机制，以及各种优化修复等
  *  
  *   图片或者节点滚动加载插件
  *
@@ -99,7 +113,7 @@ $(function () {
  *   作者：明哥先生-QQ399195513 QQ群：461550716 官网：www.shearphoto.com
  *
 -->
-<div class="header">图片滚动加载MingGe.scrollLoad2.51插件（ MingGeJS插件）--适用浏览器：IE6/7/8 及尘世间所有浏览器--作者：明哥 QQ399195513</div>
+<div class="header">图片滚动加载MingGe.scrollLoad2.52插件（ MingGeJS插件）--适用浏览器：IE6/7/8 及尘世间所有浏览器--作者：明哥 QQ399195513</div>
 <ul class="box">
   <li><img _src="images/1.jpg" /></li>
   <li><img _src="images/2.jpg" /></li>
