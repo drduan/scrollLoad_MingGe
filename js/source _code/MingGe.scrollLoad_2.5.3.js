@@ -1,6 +1,6 @@
-/*   MingGe.scrollLoad2.52插件（Min）
+/*   MingGe.scrollLoad2.53插件（Min）
  *
- *   2.52升级内容：加入bubblScrollLoad手动冒泡事件，container容器操作，这个功能在2.0的时候忘记了，修复各种事件机制，以及各种优化修复等
+ *   2.53升级内容：加入bubblScrollLoad手动冒泡事件，container容器操作，这个功能在2.0的时候忘记了，修复各种事件机制，以及各种优化修复等
  *  
  *   图片或者节点滚动加载插件
  *
@@ -10,23 +10,26 @@
  */
 (function(window, undefined) {
     var D = MingGe,
+    DOC = document,
     delEvent = D.delEvent,
     addEvent = D.addEvent,
+    trim = D.trim,
+    isFunction = D.isFunction,
+    isString = D.isString,
+    isEmptyObject = D.isEmptyObject,
+    isUndefined = D.isUndefined,
+    isNumber = D.isNumber,
     cacheData = [],
-    isTransition,
-    getOpacity,
-    DOC = document,
-    defaultArg = {
-        attr: "_src",
-        loadTime: 50,
-        container: $(window),
-        del: true,
-        animate: ["ease", 500],
-        event: "scroll"
-    },
+    aniArr = ["ease", 500],
+    MG = "MingGeScrollLoad",
+    ST = setTimeout,
+    scr = "scroll",
+    isTransition = !!(D._protected.transition = D.html5Attribute("transition")),
+    getOpacity = D._protected.opacity = D.html5Attribute("opacity"),
+    defaultArg,
     del = function(eve) {
         var container = this,
-        MGSL, cache, isUn = D.isUndefined(eve = D.trim(eve)),
+        MGSL, cache, isUn = isUndefined(eve = trim(eve)),
         count,
         isWin,
         eCache,
@@ -34,34 +37,34 @@
         bodys = DOC.body;
         for (var i = 0; i < container.length; i++) {
             elem = container[i];
-            isWin = elem == window || eve == "scroll" && (elem == DOC || elem == bodys);
+            isWin = elem == window || eve == scr && (elem == DOC || bodys && elem == bodys);
             eCache = isWin ? D: elem;
-            MGSL = eCache.MingGeScrollLoad;
-            if (D.isNumber(MGSL) && (cache = cacheData[MGSL])) {
+            MGSL = eCache[MG];
+            if (isNumber(MGSL) && (cache = cacheData[MGSL])) {
                 D.each(cache,
                 function(k, v) {
                     if (isUn || k == eve) {
                         count = v.callback.count;
-                        if (!isWin || k != "scroll") {
+                        if (!isWin || k != scr) {
                             delEvent(elem, k, v.callback);
                             delete cache[k];
                         } else if (count && count < 2) {
-                            isWin && k == "scroll" && delete cache[k];
-                            delEvent(window, "scroll", v.callback);
+                            isWin && k == scr && delete cache[k];
+                            delEvent(window, scr, v.callback);
                             delEvent(window, "resize", v.callback);
                         } else {
                             count && v.callback.count--;
                         }
                     }
-                    if (D.isEmptyObject(cache)) {
+                    if (isEmptyObject(cache)) {
                         delete cacheData[MGSL];
-                        if (D.isEmptyObject(cacheData)) {
+                        if (isEmptyObject(cacheData)) {
                             cacheData = [];
                         }
                         try {
-                            delete eCache.MingGeScrollLoad;
+                            delete eCache[MG];
                         } catch(e) {
-                            eCache.MingGeScrollLoad = undefined;
+                            eCache[MG] = undefined;
                         }
                     }
                 });
@@ -83,28 +86,21 @@
                 clearTimeout(this_.timer);
                 this_.timer = null;
             }
-            this_.timer = setTimeout(function() {
+            this_.timer = ST(function() {
                 this_.run();
                 this_.timer = null;
             },
             this_.arg.loadTime);
         };
     },
-    varObj = function(obj) {
-        var O = {};
-        for (var key in obj) {
-            if (obj.hasOwnProperty(key)) O[key] = obj[key];
-        }
-        return O;
-    },
-    opacity = function(MimgGet, this_) {
+    animate = function(MimgGet, this_) {
         return function() {
             var arg = this_.arg,
-            animate = arg.animate;
+            ani = arg.animate;
             MimgGet.animate({
                 opacity: 1
             },
-            animate[1], animate[0],
+            ani[1], ani[0],
             function() {
                 this.style[getOpacity] = null;
                 arg.success && arg.success.call(this);
@@ -112,29 +108,61 @@
             this_.callback();
         };
     },
+    imgEve = function(func, imgObj, imgLoad) {
+        func(imgObj, "load", imgLoad);
+        func(imgObj, "error", imgLoad);
+    },
     forceArg = function(arg, elem) {
-        arg.attr = D.isString(arg.attr) ? D.trim(arg.attr) : null;
-        arg.loadTime = D.isNumber(arg.loadTime = parseFloat(arg.loadTime)) && arg.loadTime !== 0 ? arg.loadTime: 50;
-        D.isFunction(arg.success) || (arg.success = false);
-        D.isFunction(arg.error) || (arg.error = false);
-        D.isString(arg.defaultSrc) && arg.attr && setDefault(elem, arg);
+        arg.attr = isString(arg.attr) ? trim(arg.attr) : null;
+        arg.loadTime = isNumber(arg.loadTime = parseFloat(arg.loadTime)) && arg.loadTime !== 0 ? arg.loadTime: 50;
+        isFunction(arg.success) || (arg.success = false);
+        arg.defaultSrc && arg.attr && setDefault(elem, arg);
         if (arg.animate !== false && !D.isArray(arg.animate)) {
-            arg.animate = ["ease", 500];
+            arg.animate = aniArr;
         }
     },
-    scrollLoad = function(elem, arg) {
-        isTransition == null && (getOpacity = D.html5Attribute("opacity"), isTransition = !!(D._protected.transition = D.html5Attribute("transition")));
-        D.isObject(arg) || (arg = {});
-        D.isString(arg.event) || (arg.event = defaultArg.event);
+    scrollLoad = function(elem, arg, func) {
+        defaultArg || (defaultArg = {
+            attr: "_src",
+            loadTime: 50,
+            container: D(window),
+            del: true,
+            animate: aniArr,
+            event: scr
+        });
+        var types = toString.call(arg);
+        if (!isFunction(func)) {
+            func = isFunction(arg, types) ? arg: false;
+        }
+        D.isObject(arg, types) || (arg = {});
+        arg.event = isString(arg.event) ? trim(arg.event) : defaultArg.event;
         arg.container || (arg.container = defaultArg.container);
         this.callback = initCallback(this);
         this.callback.count = 0;
-        this.writeEvent(this.callback, elem, arg);
+        this.inImg(elem, arg, func);
     };
     scrollLoad.prototype = {
+        inImg: function(elem, arg, func) {
+            if (isString(arg.defaultSrc)) {
+                arg.defaultSrc = trim(arg.defaultSrc);
+                var loading = new Image(),
+                this_ = this,
+                imgLoad = function() {
+                    imgEve(delEvent, loading, imgLoad);
+                    this_.writeEvent(this_.callback, elem, arg);
+                    func && func();
+                };
+                imgEve(addEvent, loading, imgLoad);
+                loading.src = arg.defaultSrc;
+            } else {
+                this.writeEvent(this.callback, elem, arg);
+                func && func();
+            }
+        },
         handle: function(container, elem, arg, eCache, isScroll, isForce) {
-            var MGSL = eCache.MingGeScrollLoad,
-            cache, isCache = D.isNumber(MGSL) && (cache = cacheData[MGSL]);
+            var MGSL = eCache[MG],
+            cache,
+            isCache = isNumber(MGSL) && (cache = cacheData[MGSL]);
             if (!isForce && isCache && (cache = cache[arg.event])) {
                 forceArg.call(cache, cache.arg = D.extend(cache.arg, arg), elem);
                 cache.img = elem;
@@ -145,12 +173,12 @@
                     if (isCache) {
                         isCache[arg.event] = this;
                     } else {
-                        cacheData[eCache.MingGeScrollLoad = cacheData.push({}) - 1][arg.event] = this;
+                        cacheData[eCache[MG] = cacheData.push({}) - 1][arg.event] = this;
                     }
                 }
-                this.arg || (forceArg.call(this, this.arg = D.extend(varObj(defaultArg), arg), elem), this.img = elem);
+                this.arg || (forceArg.call(this, this.arg = D.extend(defaultArg, arg), elem), this.img = elem);
                 if (container == window && isScroll) {
-                    addEvent(window, "scroll", callback);
+                    addEvent(window, scr, callback);
                     addEvent(window, "resize", callback);
                 } else {
                     addEvent(container, arg.event, callback);
@@ -162,11 +190,11 @@
             var i = 0,
             container, eCache, is = 0,
             bodys = DOC.body,
-            isScroll = arg.event == "scroll",
+            isScroll = arg.event == scr,
             isForce;
             if (arg.container && arg.container.version) {
                 while (container = arg.container.nodeList[i++]) {
-                    if (isScroll && (container == window || container == DOC || container == bodys)) {
+                    if (isScroll && (container == window || container == DOC || bodys && container == bodys)) {
                         is || (is = 1);
                     } else {
                         eCache = container == window ? D: container;
@@ -190,22 +218,16 @@
                 src = this.isRange(args, imgGet);
                 if (src) {
                     img.splice(i, 1);
-                    var loading, this_ = this;
                     if (src !== true) {
-                        loading = new Image();
-                        var imgError = function() {
-                            delEvent(loading, "load", imgLoad);
-                            delEvent(loading, "error", imgError);
-                            arg.error && arg.error.call(imgGet);
-                        },
+                        var this_ = this,
+                        loading = new Image(),
                         imgLoad = function() {
-                            delEvent(loading, "load", imgLoad);
-                            delEvent(loading, "error", imgError);
+                            imgEve(delEvent, loading, imgLoad);
                             if (isTransition && arg.animate) {
                                 imgGet.style[getOpacity] = 0;
-                                setTimeout(opacity(D(imgGet), this_), 10);
+                                ST(animate(D(imgGet), this_), 10);
                             } else {
-                                setTimeout(function() {
+                                ST(function() {
                                     this_.callback();
                                 },
                                 10);
@@ -214,8 +236,7 @@
                             imgGet.src = src;
                             imgGet.removeAttribute(arg.attr);
                         };
-                        addEvent(loading, "load", imgLoad);
-                        addEvent(loading, "error", imgError);
+                        imgEve(addEvent, loading, imgLoad);
                         loading.src = src;
                     }
                     loading || arg.success && arg.success.call(imgGet);
@@ -235,11 +256,8 @@
                 imgRangeLEnd = imgRangeL + imgGet.offsetWidth,
                 imgRangeT = rect.top + RangeT + 1,
                 imgRangeTEnd = imgRangeT + imgGet.offsetHeight;
-                if ((imgRangeT > RangeT && imgRangeT < RangeTEnd 
-				|| imgRangeTEnd > RangeT&& imgRangeTEnd < RangeTEnd) 
-				&& 
-				(imgRangeL > RangeL && imgRangeL < RangeLEnd 
-				|| imgRangeLEnd > RangeL && imgRangeLEnd < RangeLEnd)) {
+                if ((imgRangeT > RangeT && imgRangeT < RangeTEnd || imgRangeTEnd > RangeT && imgRangeTEnd < RangeTEnd) && 
+				    (imgRangeL > RangeL && imgRangeL < RangeLEnd || imgRangeLEnd > RangeL && imgRangeLEnd < RangeLEnd)) {
                     return src;
                 }
             } else return false;
@@ -268,18 +286,18 @@
         bubblScrollLoad: function(eveName) {
             var elem, i = 0,
             MGSL, cache;
-            eveName = D.isString(eveName) && D.trim(eveName) || "scroll";
+            eveName = isString(eveName) && trim(eveName) || scr;
             while (elem = this.nodeList[i++]) {
-                cache = elem == window || eveName == "scroll" && (elem == DOC || elem == DOC.body) ? D: elem;
-                MGSL = cache.MingGeScrollLoad;
-                if (D.isNumber(MGSL) && (cache = cacheData[MGSL]) && (cache = cacheData[MGSL][eveName])) {
+                cache = elem == window || eveName == scr && (elem == DOC || elem == DOC.body) ? D: elem;
+                MGSL = cache[MG];
+                if (isNumber(MGSL) && (cache = cacheData[MGSL]) && (cache = cacheData[MGSL][eveName])) {
                     cache.callback();
                 }
             }
             return this;
         },
-        scrollLoad: function(options) {
-            new scrollLoad(this.nodeList.concat(), options);
+        scrollLoad: function(options, func) {
+            new scrollLoad(this.nodeList.concat(), options, func);
             return this;
         }
     });

@@ -1,8 +1,8 @@
-MingGe.scrollLoad2.52¹ö¶¯¼ÓÔØ²å¼þ£º
+MingGe.scrollLoad2.53¹ö¶¯¼ÓÔØ²å¼þ£º
 
-PS:2.52Éý¼¶ÄÚÈÝ£º¼ÓÈëcontainerÈÝÆ÷²Ù×÷£¬Õâ¸ö¹¦ÄÜÔÚ2.52µÄÊ±ºòÍü¼ÇÁË£¬ÐÞ¸´¸÷ÖÖÊÂ¼þ»úÖÆ£¬ÒÔ¼°¸÷ÖÖÓÅ»¯ÐÞ¸´µÈ
+PS:2.53Éý¼¶ÄÚÈÝ£º¼ÓÈëcontainerÈÝÆ÷²Ù×÷£¬Õâ¸ö¹¦ÄÜÔÚ2.53µÄÊ±ºòÍü¼ÇÁË£¬ÐÞ¸´¸÷ÖÖÊÂ¼þ»úÖÆ£¬ÒÔ¼°¸÷ÖÖÓÅ»¯ÐÞ¸´µÈ
 
-MingGe.scrollLoad2.52²å¼þÔËÐÐËÙ¶È·Ç³£¿ì£¬
+MingGe.scrollLoad2.53²å¼þÔËÐÐËÙ¶È·Ç³£¿ì£¬
 demo.htmlÑÝÊÔ²ÉÓÃµÄ´óÁ¿Í¼Æ¬ÒÔÆÙ²¼Á÷ÐÎÊ½¹ö¶¯²âÊÔ¡£
 ÎÒÌØÒâ°Ù¶ÈÁËÍ¬ÀàÐÍ²å¼þ£¬Í¼Æ¬Ì«¶àÊ±¹ö¶¯³¬¼¶¿¨£¬¶øÇÒBUG½Ï¶à£¨ÎÒÖ»ÑÝÊÔÁË3-4¸öÍ¬ÀàÐÍµÄ²å¼þ£©¡£
 ¶øMingGe.scrollLoadÄØ ¹ö¶¯Ê±£¬Ôò·Ç³£Á÷³©£¬Õâ¾ÍÊÇMingGe.scrollLoadµÄ¸ßÐ§ÐÔÄÜ¡£
@@ -51,7 +51,7 @@ MingGe.scrollLoadÐªË¹µ×Àï¾ÍÊÇÒª¹ÊÒâ²»Ö§³ÖJQUERY£¬Ç¿ÆÈÄãÊ¹ÓÃMingGeJS×÷ÎªÀà¿â£¬Õâ½
 
 »ùÓÚMingGeJS¿ª·¢£¨MingGeJS²å¼þ£©
 
-°æ±¾ºÅ£ºMingGe.scrollLoad2.52
+°æ±¾ºÅ£ºMingGe.scrollLoad2.53
 
 ×÷Õß£ºÃ÷¸ç QQ399195513  
 
