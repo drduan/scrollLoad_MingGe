@@ -1,6 +1,6 @@
-JQUERY党注意： 打开MingGe_Min_1.9.1.js   ，把文件拉到尾部
+JQUERY党注意： 打开MingGe_Min_1.9.3.js   ，把文件拉到尾部
 
-MingGe_Min_1.9.1.js 找到 (window,"$");        把“$”改为其他名称，否则和JQUERY冲突了
+MingGe_Min_1.9.3.js 找到 (window,"$");        把“$”改为其他名称，否则和JQUERY冲突了
 
 改完后把接口 $的符号也相应改一下，如 $("img") 和 $(window)  把$符号改好
 
